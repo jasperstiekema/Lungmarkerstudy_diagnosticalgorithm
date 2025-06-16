@@ -6,21 +6,25 @@ import matplotlib.pyplot as plt
 from logistic_regression_pipeline_RFE import logistic_regression_pipeline_RFE
 import seaborn as sns
 
-df_input = pd.read_excel('Example_data_train_model.xlsx')
+# Load data
+df_input = pd.read_excel(r"D:\Extra data\LBxSF_labeled.xlsx")
 
-#log-10 scale the protein TMs and cell-free DNA concentrations
+# Log-10 transform the protein markers and cfDNA concentration
 X = pd.DataFrame()
-names_log10_var = ['CA125','CA15.3','CEA','CYFRA 21-1','HE4','NSE','proGRP','SCCA','cfDNA']
-for i in range(0,len(names_log10_var)):
-    X[names_log10_var[i]] = np.log10(df_input.loc[:,names_log10_var[i]])
+names_log10_var = ['CA125', 'CA15.3', 'CEA', 'Cyfra 21.1', 'HE4', 'NSE', 'proGRP', 'SCC', 'cfDNA']
+for name in names_log10_var:
+    X[name] = np.log10(df_input[name])
 
-names_nolog10_var = ['ctDNA','Age','Sex']
-for j in range(0,len(names_nolog10_var)):
-    X[names_nolog10_var[j]] = df_input.loc[:,names_nolog10_var[j]]
+# Add non-log-transformed features
+names_nolog10_var = ['ctDNA', 'Age', 'Gender']
+for name in names_nolog10_var:
+    X[name] = df_input[name]
 
-y_primary = df_input.loc[:,'LC']
-y_nsclc = df_input.loc[:,'NSCLC']
-y_sclc = df_input.loc[:,'SCLC']
+# Create binary labels
+y_primary = df_input['label'].isin([1, 2]).astype(int)  # LC (1 or 2) vs no LC (0)
+y_nsclc = (df_input['label'] == 1).astype(int)
+y_sclc = (df_input['label'] == 2).astype(int)
+
 
 #Define the classification problem that will be addressed by the model (choose one of the 3 problems below)
 problem = 'LC' #no LC vs. LC (with PPV >= 98%)
@@ -42,12 +46,12 @@ elif problem == 'SCLC':
 
 
 #Define what input variables will be used in the model, only the protein TMs were used for RFE
-X = X.loc[:,['CA125','CA15.3','CEA','CYFRA 21-1','HE4','NSE','proGRP','SCCA']]
+X = X.loc[:,['CA125','CA15.3','CEA','Cyfra 21.1','HE4','NSE','proGRP','SCC']]
  
 #Names of the input variables
 names_TMs = list(X)
 #Define continuous variables (cnt_var), as these will be standardized before logistic regression
-cnt_var = ['CA125','CA15.3','CEA','CYFRA 21-1','HE4','NSE','proGRP','SCCA']
+cnt_var = ['CA125','CA15.3','CEA','Cyfra 21.1','HE4','NSE','proGRP','SCC']
 solver = 'saga'
 
 #Define the number of features that will be selected in the end
@@ -228,4 +232,20 @@ plt.yticks(ticks =  np.linspace(0.5,len(names_TMs)-0.5,len(names_TMs)), labels =
 plt.ylabel('Input variables')
 plt.tight_layout()
 
+# At the end of the script, add:
+# Save performance metrics table
+performance_metrics_table_above_thresh.to_csv("performance_metrics_table.csv")
+print("Performance metrics saved to performance_metrics_table.csv")
 
+# Save selected features matrix
+np.savetxt("selected_features_matrix.csv", selected_features_matrix_above_thresh, delimiter=",", header=",".join([str(n) for n in n_features_to_select]), comments="")
+print("Selected features matrix saved to selected_features_matrix.csv")
+
+# Save other variables (e.g., predicted probabilities)
+np.savetxt("predicted_prob_above_thresh.csv", predicted_prob_above_thresh_nfeatures[0], delimiter=",")  # Example for first n_features
+print("Predicted probabilities saved to predicted_prob_above_thresh.csv")
+
+# Save heatmap
+plt.savefig("feature_selection_heatmap.png", dpi=300, bbox_inches="tight")
+print("Heatmap saved to feature_selection_heatmap.png")
+plt.close()  # Close the plot to free memory

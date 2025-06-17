@@ -21,7 +21,7 @@ def logistic_regression_pipeline_RFE(X, y, names_TMs, cnt_var, names_classes, so
     y = np.array(y)
     
     #Define number of splits and repetitions for repeated statified K-fold cross-validation
-    skf = RepeatedStratifiedKFold(n_splits=5, n_repeats = 2, random_state = 42)
+    skf = RepeatedStratifiedKFold(n_splits=5, n_repeats = 200, random_state = 42)
     n_splits = skf.get_n_splits(X, y)
    
     #Create lists to save all performance metrics per split of the data

@@ -8,13 +8,11 @@ from ROC_curve_with_confidence_interval import *
 import matplotlib.pyplot as plt
 
 #Main file to run the models with own data
-#df_input = pd.read_excel('Example_data_run_models.xlsx', sheet_name = 'With output')
-df_input = pd.read_excel('Example_data_run_models.xlsx', sheet_name = 'Without output')
-
+df_input = pd.read_excel(r"D:\Extra data\LBxSF_labeled.xlsx")
 
 #log-10 scale the protein TMs and cell-free DNA concentrations
 X = pd.DataFrame()
-names_log10_var = ['CA125','CA15.3','CEA','CYFRA 21-1','NSE','proGRP','cfDNA']
+names_log10_var = ['CA125','CA15.3','CEA','Cyfra 21.1','NSE','proGRP','cfDNA']
 for i in range(0,len(names_log10_var)):
     X[names_log10_var[i]] = np.log10(df_input.loc[:,names_log10_var[i]])
 
